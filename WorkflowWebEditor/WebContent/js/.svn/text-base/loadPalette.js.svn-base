@@ -1,0 +1,217 @@
+
+var jsonData ;
+function evento_loadJSONPalette(functionTOcall){
+	var file_palette=document.getElementById("file_palette").files[0];
+	console.log("LOAD JSON");
+	var fileToLoad = file_palette;
+	
+	var fileReader = new FileReader();
+	fileReader.onload = function(fileLoadedEvent) 
+	{
+		var jsonString = fileLoadedEvent.target.result;
+		 jsonData = JSON.parse(jsonString);
+		definePalette(jsonData);
+		
+	};
+	fileReader.readAsText(fileToLoad, "UTF-8");
+	
+	
+};
+
+
+function loadGenericElement(){
+	$('#poolDivGeneric').show();
+	$('#activityDivGeneric').show();
+	$('#gatewayDivGeneric').show();
+	$('#eventDivGeneric').show();
+	$('#dataObjectGenericDiv').show();
+	$('#messageGenericDiv').show();
+	
+}
+function definePalette(data){
+			$('#activityDiv').empty();
+			$('#gatewayDiv').empty();
+			$('#eventDiv').empty();
+			$('#messageDiv').empty();
+			$('#accordion').accordion('destroy').accordion();
+			console.log("LOAD PALETTE");
+			
+	 		var genericEl=data.genericElement;
+	 		if(genericEl){
+	 			loadGenericElement();
+	 		}
+	 		
+	 		$.each(data.task, function(index, d){            
+
+	 		var idTask=data.task[index].typeId; 
+	 		var errorConnection= data.task[index].errorConnection;
+	 		var exitCodesFile= data.task[index].exitCodes;
+
+	 			$('#activityDiv').append('<input id="urlTask'+idTask+'" type="hidden" value="'+ data.task[index].url+'"/><input id="nameTask'+idTask+'" type="hidden" value="'+ data.task[index].name+'"/><input id="exitCode'+idTask+'" type="hidden" value="'+ data.task[index].exitCodes+'"/><table> <tr><td><img id="'+idTask+'" src="img/activity.jpg" width="40" height="40"/></td> <td><p>'+data.task[index].name+'</p></td></tr></table>')
+	 			 var idTaskDragg="#"+idTask;
+	 			 
+
+	 			$( idTaskDragg ).draggable(
+	 			    		{
+	 			    			
+	 			    			
+	 			    	       helper : "clone",
+	 			    	       
+	 			    	       stop:function(event,ui) {
+	 			    	    	  setPosition(event,ui);
+	 			    	    	 
+	 			    	    	  var nameTaskId="#nameTask"+idTask;
+	 			    	    	  var urlTaskId="#urlTask"+idTask;
+	 			    	    	  var nameTask=$( nameTaskId ).val();
+	 			    	    	  var urlTask=$( urlTaskId ).val();
+	 			    	    	
+	 			    	          addActivity(xPos,yPos,idTask,nameTask,exitCodesFile,urlTask,errorConnection);
+	 			    	       }
+	 			    		
+	 			    	      }		
+	 			    );
+	 			
+	 	    });
+	 		$('#accordion').accordion('destroy').accordion();
+	 		$.each(data.gateway, function(index, d){            
+
+	 			var idGateway=data.gateway[index].typeId; 
+	 			var exitCodesFile= data.gateway[index].exitCodes;
+	 			var fixedValue= data.gateway[index].fixedType;
+	 			var typeGatewayValue= data.gateway[index].type;
+
+
+	 				$('#gatewayDiv').append('<input id="urlgateway'+idGateway+'" type="hidden" value="'+ data.gateway[index].url+'"/><input id="namegateway'+idGateway+'" type="hidden" value="'+ data.gateway[index].name+'"/><input id="exitCode'+idGateway+'" type="hidden" value="'+ data.gateway[index].exitCodes+'"/><table> <tr><td><img id="'+idGateway+'" src="img/gateway.jpg" width="40" height="40"/></td> <td><p>'+data.gateway[index].name+'</p></td></tr></table>')
+	 				 var idGatewayDragg="#"+idGateway;
+	 				$( idGatewayDragg ).draggable(
+	 				    		{
+	 				    			
+	 				    			
+	 				    	       helper : "clone",
+	 				    	       
+	 				    	       stop:function(event,ui) {
+	 				    	    	  setPosition(event,ui);
+	 				    	    	
+	 				    	    	  var nameGatewayId="#namegateway"+idGateway;
+	 				    	    	  var nameGateway=$( nameGatewayId ).val();
+	 				    	    	
+	 				    	    	 addGateway(xPos,yPos,idGateway,nameGateway,exitCodesFile,fixedValue,typeGatewayValue);
+	 				    	       }
+	 				    		
+	 				    	      }		
+	 				    );
+	 				
+	 		    });
+	 		
+	 		$('#accordion').accordion('destroy').accordion();
+	 		
+	 		
+	 		$.each(data.event, function(index, d){            
+
+	 			var idEvent=data.event[index].typeId; 
+	 			var fixedValue= data.event[index].fixedType;
+	 			var typeEventValue= data.event[index].type;
+
+	 			$('#eventDiv').append('<input id="urlevent'+idEvent+'" type="hidden" value="'+ data.event[index].url+'"/><input id="nameevent'+idEvent+'" type="hidden" value="'+ data.event[index].name+'"/><input id="exitCode'+idEvent+'" type="hidden" value="'+ data.event[index].exitCodes+'"/><table> <tr><td><img id="'+idEvent+'" src="img/event.jpg" width="40" height="40"/></td> <td><p>'+data.event[index].name+'</p></td></tr></table>')
+	 				var idEventDragg="#"+idEvent;
+	 				  
+	 				$( idEventDragg ).draggable(
+	 				    		{
+	 				    			
+	 				    			
+	 				    	       helper : "clone",
+	 				    	       
+	 				    	       stop:function(event,ui) {
+	 				    	    	  setPosition(event,ui);
+	 				    	    	  var nameEventId="#nameevent"+idEvent;
+	 				    	    	  var nameEvent=$( nameEventId ).val();
+	 				    	    	  addEvent(xPos,yPos,idEvent,nameEvent,false,fixedValue,typeEventValue);
+	 				    	       }
+	 				    		
+	 				    	      }		
+	 				    );
+	 				
+	 		    });
+	 		
+	 		$('#accordion').accordion('destroy').accordion();
+	 		
+	 		
+	 		
+	 		$.each(data.message, function(index, d){            
+
+	 			var idMessage=data.message[index].typeId; 
+
+
+	 				$('#messageDiv').append('<input id="urlmessage'+idMessage+'" type="hidden" value="'+ data.message[index].url+'"/><input id="namemessage'+idMessage+'" type="hidden" value="'+ data.message[index].name+'"/><input id="exitCode'+idMessage+'" type="hidden" value="'+ data.message[index].exitCodes+'"/><table> <tr><td><img id="'+idMessage+'" src="img/message.png" width="40" height="40"/></td> <td><p>'+data.message[index].name+'</p></td></tr></table>')
+	 				 var idMessageDragg="#"+idMessage;
+	 				
+	 				$( idMessageDragg ).draggable(
+	 				    		{
+	 				    			
+	 				    			
+	 				    	       helper : "clone",
+	 				    	       
+	 				    	       stop:function(message,ui) {
+	 				    	    	  setPosition(message,ui);
+	 				    	    	  var nameMessageId="#namemessage"+idMessage;
+	 				    	    	  var nameMessage=$( nameMessageId ).val();
+	 				    	    	  addMessage(xPos,yPos,idMessage,nameMessage);
+	 				    	       }
+	 				    		
+	 				    	      }		
+	 				    );
+	 				
+	 		    });
+	 		
+	 		$('#accordion').accordion('destroy').accordion();
+		}
+	
+		function load_palette_from_URL (filePaletteJson){
+			
+			jQuery.get(filePaletteJson, function(data) { 
+				definePalette(data);
+			 });
+		};
+		
+		
+		 function evento_show_customProperties() 
+		    {
+		 
+//	     Informazioni aggiuntie che devono essere passati all'url:
+//		 ID	Identificativo del processo passato all’editor come parametro in querystring
+//		 TaskID	Identificativo dell’istanza dell’elemento selezionato all’interno del processo.
+//		 TYPEID	Identificativo dell’elemento selezionato
+				//var id= $( "#idProcess" ).val();//da impostare
+				var id=idProcess;
+		    	var taskId= $( "#idElemento" ).val();
+		    	var typeId= $( "#idType" ).val();
+		    	//URL COMPLETA DA PASSARE 
+		    	var urlTask=$('#urlTask').val()+"?&ID='"+id+"'&TaskID='"+taskId+"'&TYPEID='"+typeId+"'";
+		    	// var urlTask=$('#urlTask').val();
+		    	console.log("urlTask-->>"+urlTask);
+		    	console.log("id PROCESS:"+id);
+		    	console.log("taskId:"+taskId);
+				console.log("typeId:"+typeId);
+				$('#loadProperty').empty();
+				
+				$('#loadProperty').append('<iframe id="some-dialog" src="'+urlTask+'"></iframe>');
+		 		$( "#some-dialog" ).dialog({
+		 			 
+		 			});
+		 		
+		 	// Recupero i valori passati con GET
+		 
+		 	var get = parseGetVars(urlTask);
+
+		 	// estraggo dall'array contenente i valori della querystring
+		 	// il valore dei parametri
+		 	var IdVal = get['ID'];
+		 	var taskIdVal = get['TaskID'];
+			var typeIdVal = get['TYPEID'];
+		 	console.log("GET ID-->>"+IdVal);
+		 	console.log("GET TASKID-->>"+taskIdVal);
+		 	console.log("GET typeIdVal-->>"+typeIdVal);
+
+		 	
+		   
+		    }
