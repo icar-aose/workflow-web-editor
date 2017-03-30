@@ -1,0 +1,211 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Workflow Web Editor</title>
+
+<link rel="stylesheet" type="text/css" href="css/jquery.mCustomScrollbar.css" />
+<link rel="stylesheet" type="text/css" href="css/jquery-ui.css" />
+<link rel="stylesheet" type="text/css" href="jointjs/joint.all.css" />
+<link rel="stylesheet" type="text/css" href="css/simple.datagrid.css"/>
+<link type="text/css" rel="stylesheet" href="css/jsgrid.min.css" />
+<link type="text/css" rel="stylesheet" href="css/jsgrid-theme.min.css" />
+
+<link rel="stylesheet" type="text/css" href="css/Main.css" />
+
+
+
+<script type="text/javascript" src="lib/jquery-1.10.2.js"></script>
+<script type="text/javascript" src="lib/jquery-ui.js"></script>
+<script type="text/javascript" src="lib/jquery.mCustomScrollbar.concat.min.js"></script>
+
+<script type="text/javascript" src="lib/lodash.min.js"></script>
+<script type="text/javascript" src="lib/backbone-min.js"></script>
+
+
+<script type="text/javascript" src="lib/joint.js"></script>
+<script type="text/javascript" src="lib/joint.all.clean.js"></script>
+
+
+
+<script type="text/javascript" src="lib/simple.datagrid.js"></script>
+<script type="text/javascript" src="lib/jsgrid.min.js"></script>
+
+<script type="text/javascript" src="lib/XMLWriter-1.0.0-min.js"></script>
+
+
+<script type="text/javascript" src="js/Main.js"></script>
+<script type="text/javascript" src="js/FileSaver.js"></script>
+<script type="text/javascript" src="js/jquery.fileDownload.js"></script>
+<script type="text/javascript" src="js/standard_inspector.js"></script>
+<script type="text/javascript" src="js/standard_BPMN_palette.js"></script>
+<script type="text/javascript" src="js/import_WF.js"></script>
+<script type="text/javascript" src="js/exportXMI.js"></script>
+<script type="text/javascript" src="js/exporter_BPMN.js"></script>
+<script type="text/javascript" src="js/exportGOALSPEC.js"></script>
+<script type="text/javascript" src="js/exportPNG.js"></script> 
+ 
+<script>
+
+
+		var graph; 
+		var paper;
+		var selection;
+	    var selectionView;
+	    var snaplines;
+	    
+		$( function() {
+		  	graph = new joint.dia.Graph();
+		  	
+		  	initialize_inspector ();
+		  	
+			populate_palette_with_BPMN();
+			populate_property_with_BPMN();
+		  	
+		  	initialize_controllers();
+		  
+		} );
+		
+		function GetURLParameter(sParam)
+		{
+		    var sPageURL = window.location.search.substring(1);
+		    var sURLVariables = sPageURL.split('&');
+		    for (var i = 0; i < sURLVariables.length; i++) 
+		    {
+		        var sParameterName = sURLVariables[i].split('=');
+		        if (sParameterName[0] == sParam) 
+		        {
+		            return sParameterName[1];
+		        }
+		}
+		}
+		
+		window.onload = function(e){ 
+			var fielName = GetURLParameter('fileName');
+			var idWorkflow = GetURLParameter('idWorkflow');
+			
+			if(fielName){
+				console.log("FIEL-->"+fielName);
+				showWF(fielName)
+			}
+			else
+				
+				console.log("NO FILE EXIST");
+			if(idWorkflow){
+				console.log("load workflow from database");
+				load_workflow_from_repository(idWorkflow)
+			}
+			
+			//if browser is SAFARI disable button 
+			var isSafari = Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0;
+			console.log("isSafari-->"+isSafari);
+// 			if(isSafari){
+// 				document.getElementById('buttonToolBar').remove();
+// 				 var textnode = document.createTextNode("More fucntionalities ase available with Chrome Browser");
+// 				 document.getElementById("tool-bar").appendChild(textnode);
+// 			}
+			
+		}
+		
+	</script>
+
+</head>
+<body>
+<!-- <canvas id="canvas" width="1000px" height="600px"></canvas> -->
+<!-- <canvas id="canvas" width="1000px" height="600px"></canvas>  -->
+	<div id="main-container">
+<!-- <a href="http://ecos.pa.icar.cnr.it/" ><img src="img/ECOSICAR.png" style="align:center;    margin-left: 40% ; width: 20%" /></a>  -->
+		
+		<div id="tool-title">
+		
+			<div style="text-align: center">WORKFLOW WEB EDITOR</div>
+		</div>
+		<div id="tool-bar">
+			<button  id="newFile" class="menu-item" onclick="newFileConfirm()">new</button>
+			<input class="menu-item" type="file" id="fileLoader" name="files" onchange="loadWF()"/>
+			<input class="menu-item"  type="button" value = "open" onclick="openfileDialog();" />
+			<input class="menu-item"  type="button" value = "save" onclick="saveDiagramm(<%%>);" />
+			<div id="buttonToolBar">
+			<input class="menu-item"  type="button" value = "export as xmi" onclick="exportXMINewId(null)"/>
+			<input class="menu-item"  type="button" value = "export as ibp" onclick="exportIBP()"/>
+			<input class="menu-item"  type="button" value = "export GoalSPEC" onclick="getGoalsSpecFromBPMN()"/>
+			<input class="menu-item"  type="button" value = "export PNG" onclick="exportPNG()"/>
+			<input class="menu-item"  type="button" value = "export SVG" onclick="exportSVG()"/>
+			</div>
+			<input class="menu-item"  type="button" value = "examples" onclick="location.href='index.html'"/>
+			<input class="menu-item"  type="button" value = "save on DB" onclick="saveDiagrammonDB(<%out.println(request.getParameter("idWorkflow")); %>);" />
+			
+			
+<!-- 			<button class="menu-item">open</button> -->
+<!-- 			<button class="menu-item">save</button> -->
+<!-- 			<button class="menu-item">export as xmi</button> -->
+<!--            <button class="menu-item">export as ibp</button> -->
+
+<!--			<button class="menu-item">generate GoalSPEC</button> -->
+			<button class="menu-item-end" onclick="popupDialog()">credits</button>
+		</div>
+		
+		<div id="page">
+			<div id="inspector" title="Inspector">	
+				<div id=property-accordion>
+
+					<h3>DIAGRAM</h3>
+					<div id="process-property" class="property-compartment">			
+					</div>
+
+					<h3>ELEMENT</h3>
+					<div id="element-property" class="property-compartment">
+						<div id="no-element-property" class="property-section"><i>Select an element first</i></div>
+					</div>
+
+					<h3>GEOMETRY</h3>
+					<div id="geometry-property" class="property-compartment">
+					</div>
+
+					<h3>ALIGNMENT</h3>
+					<div id="align-property" class="property-compartment">
+					</div>
+
+					<h3>CANVAS</h3>
+					<div id="paper-property" class="property-compartment">
+					</div>
+
+				</div>
+			</div>
+			<div id="instruments" title="Palette">
+				<div id="palette-accordion"></div>
+			</div>
+			<div id="paper" class="scrollbar grid"><div id="diagram"></div></div>
+			
+		</div>
+
+	</div>
+
+
+<div id="dialog" title="CREDITS" style="display: none;">
+ 	<div id="developerDiv">
+		Development:
+		</div>
+		<br>
+		<div id="people">
+		Luca Sabatucci,Antonella Cavaleri
+		</div>
+		<br>
+		<div id="superVisionerDiv">
+		Supervision:
+		</div>
+		<br>
+		<div id="people">
+		Massimo Cossentino
+	</div> 
+ 	</div>
+
+</body>
+
+
+
+
+</html>

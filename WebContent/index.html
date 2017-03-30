@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>WORKFLOW_WEB_EDITOR</title>
+<link rel="stylesheet" href="css/styleIndex.css">
+<script type="text/javascript" src="js/import_WF.js"></script>
+</head>
+<body>
+
+
+<a href="http://ecos.pa.icar.cnr.it/" ><img src="img/ECOSICAR.png" style="align:center;    margin-left: 20% ; margin-top: 10px; margin-bottom: 50px;" /></a> 
+<p id="titleText">WORKFLOW WEB EDITOR: a web tool for bpmn workflow definition</p>
+<br>
+<div id="divUpload">
+<fieldset>
+  <legend>EDIT A NEW FILE:</legend>
+  <div id="fileInput">
+  <input type="button" id="open_editor" value="RUN THE WORKFLOW EDITOR" onclick="location.href='Main.jsp';"/>
+		
+	
+  </div>
+	<br>
+	<label style="font-size:16px"> EXAMPLE: </label>
+	<br>
+	<input type="button" id="examples" value="Mail Voting" onclick="readLocalFile('email_voting.json')"/>
+<!-- 	<input type="button" id="examples" value="Book Writing" onclick="readLocalFile('./testCase/book_writing_example.bpmn')"/> -->
+<!-- 	<input type="button" id="examples" value="Hardware Retailer" onclick="readLocalFile('./testCase/hardware_retailer_example.bpmn')"/> -->
+<!-- 	<input type="button" id="examples" value="Incident Management" onclick="readLocalFile('./testCase/incident_management_example.bpmn')"/> -->
+<!-- 	<input type="button" id="examples" value="Nobel Price" onclick="readLocalFile('./testCase/nobel_prize_example.bpmn')"/> -->
+<!-- 	<input type="button" id="examples" value="Procurement" onclick="readLocalFile('./testCase/procurement_example.bpmn')"/> -->
+<!-- 	<br> -->
+	
+</fieldset>
+</div>
+
+</body>
+</html>
+
+

@@ -1,0 +1,1191 @@
+	
+var undoManager;	 
+var filePaletteJson='file/paletteNew.json';
+var idMap = {};
+function updateTypeEvent(){
+	var newType = $('#typeEventSelect').val();
+ //imposto le oprtion della select actiontype
+	
+	if(newType==="end"){
+		$('#typeEventActionSelect option[value="timer"]').hide();
+		$('#typeEventActionSelect option[value="conditional"]').hide();
+		$('#typeEventActionSelect option[value="parallelmultiple"]').hide();
+		$('#typeEventActionSelect option[value="cancel"]').show();
+		$('#typeEventActionSelect option[value="error"]').show();
+		$('#typeEventActionSelect option[value="escalation"]').show();
+		$('#typeEventActionSelect option[value="terminate"]').show();
+		$('#typeEventActionSelect option[value="compensation"]').show();
+//		$("#typeEventActionSelect").append('<option value="cancel">Cancel</option>');
+//		$("#typeEventActionSelect").append('<option value="error">Error</option>');
+//		$("#typeEventActionSelect").append('<option value="escalation">Escalation</option>');
+//		$("#typeEventActionSelect").append('<option value="compensation">Compensation</option>');
+//		$("#typeEventActionSelect").append('<option value="terminate">Terminate</option>');
+		
+	
+	}
+	else {
+		$('#typeEventActionSelect option[value="timer"]').show();
+		$('#typeEventActionSelect option[value="conditional"]').show();
+		$('#typeEventActionSelect option[value="parallelmultiple"]').show();
+		
+		$('#typeEventActionSelect option[value="cancel"]').hide();
+		$('#typeEventActionSelect option[value="error"]').hide();
+		$('#typeEventActionSelect option[value="escalation"]').hide();
+		$('#typeEventActionSelect option[value="terminate"]').hide();
+		$('#typeEventActionSelect option[value="compensation"]').hide();
+		
+//		$("#typeEventActionSelect").append('<option value="conditional">Conditional</option>');
+//		$("#typeEventActionSelect").append('<option value="timer">Timer</option>');
+//		$("#typeEventActionSelect").append('<option value="parallelmultiple">Parallel Multiple</option>');
+//		
+	}
+	for(var i=0;i<  eventList.length;i++){
+		
+		if(  eventList[i].get('id')==$('#idElemento').val()){
+			var eventElement=graph.getCell(eventList[i].get('id'));
+			  
+		
+			eventElement.onEventTypeChange(eventElement, newType);
+			eventElement.set('eventType', newType);
+			
+		}
+			
+		
+	}
+	
+}
+function updateTypeEventAction(){
+	var newActionType = $('#typeEventActionSelect').val();
+	console.log("newActionType--->"+newActionType);
+	if(newActionType==='timer'){
+		$('#timerValue').show();
+	}
+	else
+		$('#timerValue').hide();
+	if(newActionType==='conditional'){
+		$('#conditionalValue').show();
+	}
+	else
+		$('#conditionalValue').hide();
+	for(var i=0;i<  eventList.length;i++){
+		
+		if(  eventList[i].get('id')==$('#idElemento').val()){
+			var eventElement=graph.getCell(eventList[i].get('id'));
+			  
+		
+			eventElement.onEventActionChange(eventElement, newActionType);
+			eventElement.set('actionType', newActionType);
+			
+		}
+			
+		
+	}
+	
+}
+
+function updateTypeTask(){
+	var newTaskType = $('#typeTaskSelect').val();
+	for(var i=0;i<  activityList.length;i++){
+		
+		if(  activityList[i].get('id')==$('#idElemento').val()){
+			var taskElement=graph.getCell(activityList[i].get('id'));
+			  
+			taskElement.set('taskType', newTaskType);
+			taskElement.onTaskTypeChange(taskElement, newTaskType);
+			
+			
+		}
+			
+		
+	}
+}
+function updateTypeGateway(){
+	var newType = $('#typeGatewaySelect').val();
+
+	for(var  i=0;i<  gatewayList.length;i++){
+		
+		if(  gatewayList[i].get('id')==$('#idElemento').val()){
+			var gatewayElement=graph.getCell(gatewayList[i].get('id'));
+			  
+			
+			gatewayElement.onGatewayTypeChange(gatewayElement, newType);
+			gatewayElement.set('gatewayType', newType);
+			
+		}
+			
+		
+	}
+	
+}
+function removeLabelGateway(){
+	var element=graph.getCell($('#idElemento').val());
+	var textElement=element.attr('text/text');
+	var label=element.attr('.label/text');
+	if($('#conditionalProperty').val()!=="")
+		label=label+" ["+$('#conditionalProperty').val()+"]";
+	if(textElement=="")
+		element.attr('text/text', label);
+	else
+		element.attr('text/text',"");
+	
+//	gateway.attr({
+//		text: {
+//            text: nameGateway,
+//          },
+//        '.label': { text: nameGateway},
+//        '.tipologia':{text:'Gateway'}
+//       
+//		    });
+	
+}
+
+	function addActivity(xPos,yPos,idTipoTask,nameTask,exitCodes,urlTask) {
+		
+
+		numLib=  activityList.length+1;
+		var nameActivity="Basic Task";
+		if(nameTask!==undefined)
+		nameActivity=nameTask;
+		
+		var activity;
+		var size={ width:80, height: 10 };
+		var size2={ background:'green'};
+		var gateway = undefined;
+		 
+	
+
+
+		//	var nameActivity='Activity_'+numLib;
+			//Verifico se esistono degli exitcode per il tipo di activity scelta 
+			//ed eventualmente creo un shape che comprende sia activity che gateway
+
+//			if(activityType==="Second activity"){
+//				 gateway =   new joint.shapes.basic.Gateway({
+//					  position: { x: xPos+140, y: yPos+10},
+//			        size: { width: 50, height: 50 }
+//			    }); 
+//				gateway.attr({
+//					text: {
+//			            text:'',
+//			          },
+//			        '.label': { text: ''},
+//			        '.tipologia':{text:'Gateway'}
+//			       
+//					    });
+//				gateway.on("change:position",function() { 
+//					moving_entity=this; 
+//					this.set("isChanging",true); 
+//					console.log("rect moving"); 
+//				});
+//				
+//				//creo elemento Gateway e link uniti all'activity
+//			}
+				//BLOCCO UNICO CON TASK E GATEWAY
+//				console.log("ACTIVITY CON EXIT CODE");
+//				 activity = new	joint.shapes.basic.ActivityExitCode({
+//					  position: { x: xPos, y: yPos},
+//					  size: { width:150, height: 100 }
+//				      
+//				    }); 
+//				 activity.attr({
+//						text: {
+//				            text: nameActivity,
+//				          },
+//				        '.label': { text: nameActivity},
+//				        '.tipologia':{text:'Activity'},
+//				        
+//						    });
+			
+			 activity =   new joint.shapes.basic.Activity({
+				  position: { x: xPos, y: yPos},
+		        size: { width:120, height: 80 }
+		    }); 
+			 
+			activity.attr({
+				
+		        '.label': { text: nameActivity},
+		        '.tipologia':{text:'Task'},
+		        '.typeId':{text:idTipoTask},
+		        '.urlTask':{text:urlTask},
+		        
+		        '.fobj': {
+		        	
+	        	 width:80, height: 40,
+//		        	 ref: '.inner',
+//		                'ref-x': 10,
+//		               'ref-y': 10,
+	                transform: ' translate(20,20)',
+	              //  style: _.clone(size2) 
+	                 },
+	            div: { style: _.clone(size) }
+				    });
+			
+		
+			activity.on("change:position",function() { 
+				moving_entity=this; 
+				this.set("isChanging",true); 
+				
+			});
+			
+			activity.set('content',nameActivity);
+			
+			var newActivity = Activity.create({ name: nameActivity ,type:'Task',id: activity.id});
+			activityList[   activityList.length]=newActivity;
+
+			//devo disabilitare l'undo per fare in modo che venga rimosso l'intero oggetto e non i singoli elementi
+		
+			//
+			//activity.set("isAdded",true); 
+			 graph.addCell(activity);	
+				if(exitCodes!==undefined){
+					
+//					 exitCodes=exitCodes.replace("[", "");
+//					 exitCodes=exitCodes.replace("]", "");
+					 var exitCodeArray= new Array();
+					 exitCodeArray = exitCodes;
+					 
+					 gateway =   new joint.shapes.basic.Gateway({
+						  position: { x: xPos+140, y: yPos+10},
+				        size: { width: 50, height: 50 }
+				    }); 
+					gateway.attr({
+						text: {
+				            text:'Gateway',
+				          },
+				        '.label': { text: 'Gateway'},
+				        '.tipologia':{text:'Gateway'},
+				        '.exitCodes':{text:exitCodes}
+				        
+				       
+						    });
+						
+						
+					
+						var link = new joint.shapes.basic.BpmnLink({
+						    source: { id: activity.id },
+						    target: { id: gateway.id },
+						});
+						
+//						gateway.on("add",function() { 
+//							
+//							console.log("gateway added"); 
+						var newGateway = Gateway.create({ name: '' ,type:'Gateway',id:gateway.id});
+						gatewayList[ gatewayList.length]=newGateway;
+//						});
+						 graph.addCells([gateway,link]);
+						
+						//creo il link tra il gateway e activity in funzione degli exitCodes relativi all'activity
+						 var xStart=150;
+						 var yStart=80;
+						for( var i=0 ;i<exitCodeArray.length;i++){
+							 xStart=xStart+10;
+							 yStart=yStart-20;
+					 		var link1 = new joint.shapes.basic.BpmnLink({
+							    source: { id: gateway.id },
+							    target: { x: gateway.get('position').x+xStart ,y: gateway.get('position').y+yStart },
+							    
+							});
+							link1.label(0, { attrs: { text: { text: exitCodeArray[i] } } });
+
+							link1.attr({
+			    	        	'.marker-target': {fill: 'red',d: 'M 10 0 L 0 5 L 10 10 z'},
+			    	        	'.connection' : { stroke: 'red' },
+			    	          });
+							
+							 graph.addCell(link1);
+							
+				
+				 }
+						
+				}
+			 
+	}
+		
+	function addGateway(xPos,yPos,idGateway,nameGat,exitCodesGate,fixedValue,typeGatewayValue) {
+		
+	 	numgateway=gatewayList.length+1;
+		//var nameGateway='Gateway_'+numgateway;
+		
+	 	var nameGateway="Basic Gateway";
+		if(nameGat!==undefined)
+			nameGateway=nameGat;
+		var gateway =   new joint.shapes.basic.Gateway({
+			  position: { x: xPos, y: yPos},
+	        size: { width: 50, height: 50 }
+	    }); 
+		
+		gateway.attr({
+			text: {
+	            text: nameGateway,
+	            width:10
+	          },
+	        '.label': { text: nameGateway},
+	        '.tipologia':{text:'Gateway'},
+	        '.typeId':{text:idGateway},
+	       
+			    });
+	
+		if(typeGatewayValue!==undefined){
+			gateway.onGatewayTypeChange(gateway, typeGatewayValue);
+			gateway.set('gatewayType', typeGatewayValue);
+			
+		}
+			if(fixedValue!==undefined)
+				gateway.set('fixedType', fixedValue);
+			
+		gateway.on("change:position",function() { 
+			moving_entity=this; 
+			this.set("isChanging",true); 
+			
+		});
+		var newGateway = Gateway.create({ name: nameGateway ,type:'Gateway',id:gateway.id});
+		gatewayList[ gatewayList.length]=newGateway;
+
+		graph.addCell(gateway);
+	
+		if(exitCodesGate !==undefined){
+			gateway.attr({	'.exitCodes':{text:exitCodesGate}});
+			
+//			exitCodesGate=exitCodesGate.replace("[", "");
+//			exitCodesGate=exitCodesGate.replace("]", "");
+			 var exitCodeArray= new Array();
+			 exitCodeArray = exitCodesGate;
+//			 exitCodeArray = exitCodesGate.split(",");
+			 var xStart=150;
+			 var yStart=80;
+			
+			for( var i=0 ;i<exitCodeArray.length;i++){
+				 xStart=xStart+10;
+				 yStart=yStart-20;
+		 		var link1 = new joint.shapes.basic.BpmnLink({
+				    source: { id: gateway.id },
+				    target: { x: gateway.get('position').x+xStart ,y: gateway.get('position').y+yStart },
+				    
+				});
+		 		link1.setPosition
+				link1.label(0, { attrs: { text: { text: exitCodeArray[i] } } });
+
+				link1.attr({
+    	        	'.marker-target': {fill: 'red',d: 'M 10 0 L 0 5 L 10 10 z'},
+    	        	'.connection' : { stroke: 'red' },
+    	          });
+				
+				 graph.addCell(link1);
+				
+	
+	 }
+		}
+	}
+		
+		
+		function addDataObject(xPos,yPos,idDataObject,name) {
+			
+			var nameDataObject="Basic Data Object";
+			if(name!==undefined)
+				nameDataObject=name;
+		 	numDataObject=dataObjectList.length+1;
+		
+			var dataObject =   new joint.shapes.basic.DataObject({
+				  position: { x: xPos, y: yPos},
+		        size: { width: 50, height: 50 }
+		    }); 
+			dataObject.attr({
+				text: {
+					
+		            text: nameDataObject, width:5
+		 
+		        },
+		        '.label': { text: nameDataObject},
+		        '.tipologia':{text:'DataObject'} ,
+		        '.typeId':{text:idDataObject},
+		       
+				    });
+			dataObject.on("change:position",function() { 
+				moving_entity=this; 
+				this.set("isChanging",true); 
+				
+			});
+			var newDataObject = DataObject.create({ name: nameDataObject ,type:'DataObject',id:dataObject.id});
+			dataObjectList[ dataObjectList.length]=newDataObject;
+			graph.addCell(dataObject);
+		}
+		
+		function addPool(xPos,yPos,Name){
+			console.log("ADD NEW POOL");
+			var pool =   new joint.shapes.basic.Pool({
+				position: { x: xPos, y: yPos},
+		        
+		    }); 
+			pool.attr({
+				
+			text: {
+		            text: Name
+		        },
+		        
+		     '.label': { text: Name},
+		    
+		        '.tipologia':{text:'Pool'},
+
+			    });
+		
+			pool.on("change:position",function() { 
+				moving_entity=this; 
+				this.set("isChanging",true); 
+				
+			});
+			var newPool= Pool.create({ name: Name ,type:'Pool',id:pool.id});
+			poolList[ poolList.length]=newPool;
+			graph.addCell(pool);
+		}
+		
+	function addMessage(xPos,yPos,idMessage,name,urlMessage) {
+					var nameMessage="Basic Message";
+					if(name!==undefined)
+						nameMessage=name;
+				 	numMessage=messageList.length+1;
+					var message =   new joint.shapes.basic.Message({
+						position: { x: xPos, y: yPos},
+				        
+				    }); 
+					message.attr({
+					text: {
+				            text: nameMessage
+				        },
+				        '.label': { text: nameMessage},
+				        '.tipologia':{text:'Message'},
+				        '.typeId':{text:idMessage},
+				        '.urlMessage':{text:urlMessage},
+					    });
+				
+					message.on("change:position",function() { 
+						moving_entity=this; 
+						this.set("isChanging",true); 
+						
+					});
+					var newMessage = Message.create({ name: nameMessage ,type:'Message',id:message.id});
+					messageList[ messageList.length]=newMessage;
+					graph.addCell(message);
+	}
+		
+		
+
+	function addEvent(xPos,yPos,idEvent,name,isEndEvent,fixedType,typeEvent) {
+		var nameEvent="Start Event";
+		if(name!==undefined)
+			nameEvent=name;
+		numEvent=  eventList.length+1;
+		//var nameEvent='Event_'+numEvent;
+		
+		var event =   new joint.shapes.basic.Event({
+			  position: { x: xPos, y: yPos},
+	        size: { width: 50, height: 50 }
+	    }); 
+		event.attr({
+			text: {
+	            text: nameEvent
+	 
+	        },
+	        '.label': { text: nameEvent},
+	        '.tipologia':{text:'Event'},
+	        '.typeId':{text:idEvent},
+	        
+	       
+			    });
+		if(typeEvent!==undefined){
+
+			event.onEventTypeChange(event, typeEvent);
+			event.set('eventType', typeEvent);
+			
+			
+		}
+		if(fixedType!==undefined)
+		event.set('fixedType', fixedType);
+		
+		if(isEndEvent)
+			event.set('eventType','end');
+		event.on("change:position",function() { 
+			moving_entity=this; 
+			this.set("isChanging",true); 
+			
+		});
+		var newEvent = Event.create({ name: nameEvent ,type:'Event',id: event.id});
+		eventList[eventList.length]=newEvent;
+		graph.addCell(event);
+	}
+			
+	function newProprieta(tipologia){
+		console.log("Call new NAME");
+		
+		var cell=graph.getCell($('#idElemento').val());
+		
+			
+     var tipoProprietaString=$('#tipoProprieta').val();
+   //setto il valore del campo Notes
+     console.log("NOtes"+  $('#noteElement').val());
+     cell.attr('.notes/text', $('#noteElement').val());
+     cell.attr('.resourceProperty/text', $('#resourceProperty').val());
+     
+     if(tipoProprietaString.substring(tipoProprietaString.length-4, tipoProprietaString.length)=="Link"){
+			
+	for(var i=0;i<linkList.length;i++){
+				
+				if(linkList[i].get('id')==$('#idElemento').val()){
+					
+					linkList[i].set('name',$('#nomeProprieta').val());
+					cell.label(0, { attrs: { text: { text: $('#nomeProprieta').val() } } });
+					
+				}
+					
+				
+			}
+			
+			
+			
+		}
+     if($('#tipoProprieta').val()=="Pool"){
+    	 console.log("POOL NEW PROPRIETA'");
+    	 for( i=0;i<poolList.length;i++){
+				
+				if(poolList[i].get('id')==$('#idElemento').val()){
+					
+					poolList[i].set('name',$('#nomeProprieta').val());
+					
+					cell.attr('text/text', $('#nomeProprieta').val());
+					cell.attr('.label/text', $('#nomeProprieta').val());
+					
+				}
+					
+				
+			}
+    	 
+     }
+		if($('#tipoProprieta').val()=="Gateway"){
+			
+			for( i=0;i<gatewayList.length;i++){
+				
+				if(gatewayList[i].get('id')==$('#idElemento').val()){
+					
+					gatewayList[i].set('name',$('#nomeProprieta').val());
+					
+					$('#showNameGateway').prop('checked', true);
+					cell.attr('text/text', $('#nomeProprieta').val());
+					cell.attr('.label/text', $('#nomeProprieta').val());
+					
+				}
+					
+				
+			}
+			
+			
+		}
+		else if($('#tipoProprieta').val()=='Task'){
+			
+			for( i=0;i<  activityList.length;i++){
+				
+				if(  activityList[i].get('id')==$('#idElemento').val()){
+					
+					activityList[i].set('name',$('#nomeProprieta').val());
+					
+				var 	textInput= $('#nomeProprieta').val();
+				
+				 var resultEscapeHTML=escapeHtml(textInput) ;
+				
+					
+					cell.set('content', resultEscapeHTML);
+					
+				}
+					
+				
+			}
+			
+			//quando cambia la resource associata all' Activity verifico se sno presenti dei messaggatti ad esso collegati ed eventualemte imposto correttamente il sender e il receive
+			 var  outLinks=graph.getConnectedLinks(cell,{ outbound: true });
+			 var  inLinks=graph.getConnectedLinks(cell,{ inbound: true });
+			_.each(inLinks, function (inLink) {
+					
+				 
+					 var cellSource=graph.getCell(inLink.get('source').id);
+					 if((cellSource  instanceof joint.shapes.basic.Message)){
+						 cellSource.attr('.receiver/text',cell.attr('.resourceProperty/text'));
+				 }
+				
+				 
+			 });
+			 _.each(outLinks, function (outLink) {
+				
+				 
+					 var cellTarget=graph.getCell(outLink.get('target').id);
+					
+					 if((cellTarget  instanceof joint.shapes.basic.Message)){
+						
+						 cellTarget.attr('.sender/text',cell.attr('.resourceProperty/text'));
+					 }
+				 
+				 
+			 });
+			
+			
+			
+		}
+		else if($('#tipoProprieta').val()=='Event'){
+				
+				for(var i=0;i<  eventList.length;i++){
+					
+					if(  eventList[i].get('id')==$('#idElemento').val()){
+						
+						  eventList[i].set('name',$('#nomeProprieta').val());
+						  $('#showNameGateway').prop('checked', true);
+						  var labelEvent=$('#nomeProprieta').val();
+							var condition=$('#conditionalProperty').val();
+							if(condition!=="")
+								labelEvent=labelEvent+" ["+condition+"]";
+							cell.attr('text/text', labelEvent);
+							cell.attr('.label/text', $('#nomeProprieta').val());
+						
+					}
+						
+					
+				}
+				
+			}
+		
+		else if($('#tipoProprieta').val()=='DataObject'){
+			
+			for(var i=0;i<  dataObjectList.length;i++){
+				
+				if(  dataObjectList[i].get('id')==$('#idElemento').val()){
+					
+					dataObjectList[i].set('name',$('#nomeProprieta').val());
+					var labelDataObject=$('#nomeProprieta').val();
+					var state=$('#stateProprieta').val();
+					if(state!=="")
+						labelDataObject=labelDataObject+" ["+state+"]";
+					
+					cell.attr('.dataState/text',  state);
+					cell.attr('text/text',labelDataObject);
+					cell.attr('.label/text',  $('#nomeProprieta').val());
+					console.log("VAL ITEM DATA OJ:"+$('#itemDefSelect').val());
+					cell.attr('.itemRef/text', $('#itemDefSelect').val());
+					
+				}
+					
+				
+			}
+			
+		}
+		
+		else if($('#tipoProprieta').val()=='Message'){
+			
+			for( i=0;i<  messageList.length;i++){
+				
+				if(  messageList[i].get('id')==$('#idElemento').val()){
+					
+					messageList[i].set('name',$('#nomeProprieta').val());
+					cell.attr('text/text', $('#nomeProprieta').val());
+					cell.attr('.sender/text', $('#senderMessageProperty').val());
+					cell.attr('.receiver/text', $('#receiverMessageProperty').val());
+					console.log("VAL ITEM MESSAGE:"+$('#itemDefSelect').val());
+					cell.attr('.itemRef/text', $('#itemDefSelect').val());
+					
+				}
+					
+				
+			}
+			
+		}
+		
+		cell.set("isChangingProperty",false); 
+			
+		}
+		
+		function deleteElement(){
+			tipologia=$('#tipoProprieta').val();
+			var elementList ;
+			
+			if(tipologia=="Gateway")
+				elementList=gatewayList;
+			
+			if(tipologia=="Task")
+				elementList=activityList;
+			if(tipologia=="Pool")
+				elementList=poolList;
+			if(tipologia=="DataObject")
+				elementList=dataObjectList;
+			if(tipologia=="Event")
+				elementList=eventList;
+			if(tipologia=="Message")
+				elementList=messageList;
+			if(tipologia=="objectFlowLink"||tipologia=="sequenceFlowLink"||tipologia=="messageFlowLink")
+				elementList=linkList;
+			
+			for( var i=0;i<elementList.length;i++){
+				
+				if(elementList[i].get('id')==$('#idElemento').val()){
+					
+					elementList.splice(i,1);
+					}
+					
+			}
+			
+			//elimino l'elemento dalla vista
+			graph.getCell($('#idElemento').val()).remove();
+			$('#newsbox').hide();
+			
+		}
+		
+		var selection = (new Backbone.Collection).on({
+
+		  
+		});
+function loadDiagramm(){
+			
+			alert("LOAD DIAGRAMM");
+			
+			var file_input=document.getElementById("file_input").files[0];
+			
+			var fileReader = new FileReader();
+			fileReader.onload = function(fileLoadedEvent) 
+			{
+				var jsonString = fileLoadedEvent.target.result;
+				var diagrammDate=JSON.parse(jsonString);
+				
+				console.log("diagrammDate-->"+diagrammDate);
+				$.each(diagrammDate.items, function(index, d){  
+					var idItem=diagrammDate.items[index].id; 
+			 		var isCollectionItem= diagrammDate.items[index].isCollection;
+			 		var itemKind= diagrammDate.items[index].itemKind;
+			 		var structureRef= diagrammDate.items[index].structureRef;
+			 		
+			 		itemIDIncrement=idItem.substring(3,idItem.length);
+			 		console.log("LOAD DIAGRAMM itemIDIncrement-->"+itemIDIncrement);
+			 		
+			 		 console.log("idItem:"+idItem);
+					 console.log("structureRef:"+structureRef);
+					 console.log("itemKind:"+itemKind);
+					 console.log("isCollectionItem:"+isCollectionItem);
+					 $( "#items tbody" ).append( "<tr id='"+idItem+"'>" +
+				        	  "<td class='idItem'>" +idItem + "</td>" +
+				              "<td class='structureRef'>" + structureRef + "</td>" +
+				              "<td class='itemKind'>" + itemKind + "</td>" +
+				              "<td class='isCollectionItem'>" + isCollectionItem+ "</td>" +
+				              "<td><img src='img/deleteItem.jpg' onclick='removeItem("+idItem+")' width='10' height='10' /></td>" +
+				            "</tr>" );
+					 $( "#itemDefSelect" ).append( 
+				        		"<option value="+idItem+">"+structureRef+"</option>"
+				           	  
+				                 );
+				});
+				
+				graph.fromJSON(JSON.parse(jsonString));
+				
+				//inizializzo gli array del metamodello con gli oggetti presenti nel grafo
+				var allElements=graph.getElements();
+				_.each(allElements, function (element) {
+					if(element instanceof joint.shapes.basic.Activity){
+						var size={ width:80, height: 10};
+						element.attr('.fobj/width',100);
+						element.attr('.fobj/heigth',60);
+						var styleDiv=_.clone(size);
+						element.attr('div/style',styleDiv);
+						var newActivity = Activity.create({ name: element.get('content') ,type:'Task',id: element.id});
+						activityList[   activityList.length]=newActivity;
+					}
+					if(element instanceof joint.shapes.basic.Gateway){
+						var newGateway = Gateway.create({ name: element.attr('.text\text') ,type:'Gateway',id:element.id});
+						gatewayList[ gatewayList.length]=newGateway;
+					}
+					
+					if(element instanceof joint.shapes.basic.Pool){
+						var newPool = Pool.create({ name: element.attr('.text\text') ,type:'Pool',id:element.id});
+						poolList[poolList.length]=newPool;
+					}
+					if(element instanceof joint.shapes.basic.Event){
+						var newEvent = Event.create({ name: element.attr('.text\text') ,type:'Event',id: element.id});
+						eventList[eventList.length]=newEvent;
+					}
+					if(element instanceof joint.shapes.basic.Message){
+						var newMessage = Message.create({ name: element.attr('.text\text') ,type:'Message',id:element.id});
+						messageList[ messageList.length]=newMessage;
+					}
+					if(element instanceof joint.shapes.basic.DataObject){
+						var newDataObject = DataObject.create({ name:  element.attr('.text\text'),type:'DataObject',id:element.id});
+						dataObjectList[ dataObjectList.length]=newDataObject;
+					}
+				});
+				//inizializzo l'array dei link con tutti i link presenti nel grafo
+				var allLinks=graph.getLinks();
+				_.each(allLinks, function (link) {
+					linkList[linkList.length]=link;
+				});
+					
+			};
+			fileReader.readAsText(file_input, "UTF-8");
+			
+			
+		};
+		
+
+		
+		function saveDiagramm(){
+			//verifica che il diagramma che si intende salvare sia corretto
+		
+			checkDiagramm();
+			
+			// aggiungo al file JSON le informazioni relative agli Item Definitions inseriti nel diagrmma
+			var itemsDataSting='{"items":[';
+			var firstItem=false;
+			$('#items tr').each(function(riga) {
+				
+				 var idItem = $(this).find(".idItem").html(); 
+				 var structureRef = $(this).find(".structureRef").html();  
+				 var itemKind = $(this).find(".itemKind").html();  
+				 var isCollectionItem = $(this).find(".isCollectionItem").html();  
+				 if(idItem!==undefined){
+					 var firstElement="";
+					 
+					 if(firstItem)
+						 firstElement=",";
+				 var stingSingleItem=firstElement+'{"id":"'+idItem+'",'+
+				 '"isCollection":"'+isCollectionItem+'",'+
+				 '"itemKind":"'+itemKind+'",'+
+				 '"structureRef":"'+structureRef+'"}'
+				 ;
+					itemsDataSting=itemsDataSting+stingSingleItem;
+					firstItem=true;
+				 console.log("idItem:"+idItem);
+				 console.log("structureRef:"+structureRef);
+				 console.log("itemKind:"+itemKind);
+				 console.log("isCollectionItem:"+isCollectionItem);
+				
+				 }
+
+			});
+			itemsDataSting=itemsDataSting+']}';
+			console.log("JSON ITEM STRING:-->"+itemsDataSting)
+			
+			var graphdate=JSON.stringify(graph.toJSON());
+			
+			console.log("graphdate-->"+graphdate.substring(0, graphdate.indexOf("items")-2)+",");
+			var itemelemet=itemsDataSting.substring(1, graphdate.length);
+			var diagramData=graphdate.substring(0, graphdate.indexOf("items")-2)+","+itemelemet;
+			//var graphdate=JSON.stringify(graph.toJSON());
+			var textFileAsBlob = new Blob([diagramData], {type:'text/plain'});
+			
+			var fileNameToSaveAs = $('#fileName').val();
+
+			var downloadLink = document.createElement("a");
+			downloadLink.download = fileNameToSaveAs;
+			downloadLink.innerHTML = "Download File";
+			if (window.webkitURL != null)
+			{
+				downloadLink.href = window.webkitURL.createObjectURL(textFileAsBlob);
+			}
+			else
+			{
+				
+				downloadLink.href = window.URL.createObjectURL(textFileAsBlob);
+				downloadLink.style.display = "none";
+				document.body.appendChild(downloadLink);
+			}
+
+			downloadLink.click();
+			
+
+		};
+		 
+	
+//		function exportXMI(){
+//			
+//		
+//			
+//			 var xmlWriter = new  XMLWriter('MacRoman', '1.0');
+//			
+//			 xmlWriter.writeStartDocument(false);
+//			
+//			// xmlWriter.WriteProcessingInstruction("xml", "version=""1.0"" encoding=""UTF-8"" standalone=""yes""")
+//			 xmlWriter.writeStartElement( 'definitions' );
+//			 xmlWriter.writeAttributeString('xmlns', 'http://www.omg.org/spec/BPMN/20100524/MODEL');
+//			 xmlWriter.writeAttributeString('xmlns:bpmndi', 'http://www.omg.org/spec/BPMN/20100524/DI');
+//			 xmlWriter.writeAttributeString('xmlns:dc', 'http://www.omg.org/spec/DD/20100524/DC');
+//			 xmlWriter.writeAttributeString('xmlns:di', 'http://www.omg.org/spec/DD/20100524/DI');
+//			 xmlWriter.writeAttributeString('xmlns:tns', 'http://sourceforge.net/bpmn/definitions/_1419237461760');
+//			 xmlWriter.writeAttributeString('xmlns:xsd', 'http://www.w3.org/2001/XMLSchema');
+//			 xmlWriter.writeAttributeString('xmlns:xsi', 'http://www.w3.org/2001/XMLSchema-instance');
+//			 xmlWriter.writeAttributeString('xmlns:yaoqiang', 'http://bpmn.sourceforge.net');
+//				
+//			 xmlWriter.writeAttributeString('exporter', '');
+//			 xmlWriter.writeAttributeString('xmlns:xsi', 'http://www.w3.org/2001/XMLSchema-instance');
+//			 xmlWriter.writeAttributeString('exporterVersion', '2.2.5 (GPLv3, Non-Commercial)');
+//				
+//			 xmlWriter.writeAttributeString('expressionLanguage', 'http://www.w3.org/1999/XPath');
+//			 //SETTARE UN ID UNIVOCO
+//			 xmlWriter.writeAttributeString('id', '_1419237461760');
+//			 xmlWriter.writeAttributeString('name', '');
+//			 xmlWriter.writeAttributeString('targetNamespace', 'http://sourceforge.net/bpmn/definitions/_1419237461760');
+//			 xmlWriter.writeAttributeString('typeLanguage', 'http://www.omg.org/spec/BPMN/20100524/MODEL http://bpmn.sourceforge.net/schemas/BPMN20.xsd');
+//			
+//			
+//				  
+//
+//			 xmlWriter.writeStartElement( 'process' );
+//			
+//			
+//			var allElements=graph.getElements();
+//			_.each(allElements, function (element) {
+//				var  outLinks=graph.getConnectedLinks(element,{ outbound: true });
+//				console.log("ID FIRST:"+element.id);
+//				console.log("OUT LINK FIRST:"+outLinks.length);
+//				var  inLinks=graph.getConnectedLinks(element,{ intbound: true });
+//				console.log("OINLINK FIRST:"+inLinks.length);
+//				if(element instanceof joint.shapes.basic.Activity){
+//					var taskType=element.get('taskType');
+//					var taskTag='';
+//					if(taskType==='default')
+//						 taskTag='task';
+//					else
+//						 taskTag=taskType+'Task';
+//					 xmlWriter.writeStartElement(taskTag );
+//					 xmlWriter.writeAttributeString('id', element.id);
+//					 xmlWriter.writeAttributeString('completionQuantity','1');
+//					 xmlWriter.writeAttributeString('isForCompensation','false');
+//					 xmlWriter.writeAttributeString('startQuantity','1');
+//					 xmlWriter.writeAttributeString('name', element.get('content'));
+//					 if(element.get('taskType')==='receive'||element.get('taskType')==='send'||element.get('taskType')==='service'||element.get('taskType')==='user')
+//						 xmlWriter.writeAttributeString('implementation','##WebService');
+//					 if(element.get('taskType')==='receive')
+//						 xmlWriter.writeAttributeString('instantiate','false');
+//					 
+//					 //aggiungo il tag relativo ai link in ingresso ed in uscita
+//					 allTagLink(element,xmlWriter);
+//					 
+//					 //Si può usare questo metodo per trovare i dataObject collegati al task
+//					 //graph.getNeighbors(element)
+//	
+//					 xmlWriter.writeEndElement();
+//
+//				}
+//				if(element instanceof joint.shapes.basic.Gateway){
+//					var gatewayType=element.get('gatewayType');
+//					var gatewayTag='exclusiveGateway';
+//					if(gatewayType==='parallel')
+//						gatewayTag='parallelGateway';
+//					if(gatewayType==='inclusive')
+//						gatewayTag='inclusiveGateway';
+//					
+//					 xmlWriter.writeStartElement(gatewayTag );
+//					 xmlWriter.writeAttributeString('id', element.id);
+//					 console.log('TEXT GATE: '+element.attr('.label/text'));
+//					 xmlWriter.writeAttributeString('name',element.attr('.label/text'));
+//					 if(gatewayType==='inclusive')
+//					 xmlWriter.writeAttributeString('gatewayDirection', 'Unspecified');
+//					 else
+//						 xmlWriter.writeAttributeString('gatewayDirection', 'Diverging');
+//					 allTagLink(element,xmlWriter);
+//					 xmlWriter.writeEndElement();
+//					
+//				}
+//				
+//				if(element instanceof joint.shapes.basic.Event){
+//					
+//					var eventType=element.get('eventType');
+//					var eventTag='startEvent';
+//					if(eventType==='end')
+//						eventTag='endEvent';
+//					
+//					
+//					 xmlWriter.writeStartElement(eventTag );
+//					 xmlWriter.writeAttributeString('id', element.id);
+//					 console.log('TEXT GATE: '+element.attr('.label/text'));
+//					 xmlWriter.writeAttributeString('name',element.attr('.label/text'));
+//					 allTagLink(element,xmlWriter);
+//					 var eventActionType=element.get('actionType');
+//					 if(eventActionType==='parallelmultiple')
+//						 xmlWriter.writeAttributeString('parallelMultiple', 'true');
+//					 else if(eventType==='start'||eventType==='intermediate')
+//					  xmlWriter.writeAttributeString('parallelMultiple', 'false');
+//					 if(eventType==='start')
+//						 xmlWriter.writeAttributeString('isInterrupting', 'true');
+//					 if(eventType==='intermediate')
+//						 xmlWriter.writeAttributeString('isInterrupting', 'false');
+//					 
+//					 
+//					switch (eventActionType) {
+//
+//			        case 'message':
+//			        	 xmlWriter.writeStartElement('messageEventDefinition' );
+//			        	 xmlWriter.writeAttributeString('id', element.id+'_EM_1');
+//			        	 xmlWriter.writeEndElement();
+//			        	break;
+//			        case 'timer':
+//			        	 xmlWriter.writeStartElement('timerEventDefinition ' );
+//			        	 xmlWriter.writeAttributeString('id', element.id+'_ET_1');
+//			        	 xmlWriter.writeEndElement();
+//			        	break;
+//			        case 'conditional':
+//			        	 xmlWriter.writeStartElement('conditionalEventDefinition ' );
+//			        	 xmlWriter.writeAttributeString('id', element.id+'_EC_1');
+//			        	 xmlWriter.writeEndElement();
+//			        	break;
+//			        case 'signal':
+//			        	 xmlWriter.writeStartElement('signalEventDefinition ' );
+//			        	 xmlWriter.writeAttributeString('id', element.id+'_ES_1');
+//			        	 xmlWriter.writeEndElement();
+//			        	break;
+//			        	
+//			        case 'error':
+//			        	 xmlWriter.writeStartElement('errorEventDefinition  ' );
+//			        	 xmlWriter.writeAttributeString('id', element.id+'_EER_1');
+//			        	 xmlWriter.writeEndElement();
+//			        	break;
+//			        	
+//			        case 'compensation':
+//			        	 xmlWriter.writeStartElement('compensateEventDefinition  ' );
+//			        	 xmlWriter.writeAttributeString('id', element.id+'_ECM_1');
+//			        	 xmlWriter.writeEndElement();
+//			        	break;
+//			        	
+//			        case 'terminate':
+//			        	 xmlWriter.writeStartElement('terminateEventDefinition   ' );
+//			        	 xmlWriter.writeAttributeString('id', element.id+'_ET_1');
+//			        	 xmlWriter.writeEndElement();
+//			        	break;
+//			        case 'escalation':
+//			        	 xmlWriter.writeStartElement('escalationEventDefinition ' );
+//			        	 xmlWriter.writeAttributeString('id', element.id+'_ET_1');
+//			        	 xmlWriter.writeEndElement();
+//			        	break;
+//			        }
+//					
+//					 xmlWriter.writeEndElement();
+//					
+//				}
+//				if(element instanceof joint.shapes.basic.DataObject){
+//					
+//				
+//					
+//					 xmlWriter.writeStartElement('dataObject' );
+//					 xmlWriter.writeAttributeString('id', element.id);
+//					 xmlWriter.writeAttributeString('name',element.attr('.label/text'));
+//					 xmlWriter.writeAttributeString('isCollection','false');
+//					 xmlWriter.writeEndElement();
+//					 
+//					 xmlWriter.writeStartElement('dataObjectReference' );
+//					 xmlWriter.writeAttributeString('id', element.id+"_DOR");
+//					 xmlWriter.writeAttributeString('dataObjectRef',element.id);
+//					 xmlWriter.writeEndElement();
+//					
+//				}
+//				
+//				if(element instanceof joint.shapes.basic.Message){
+//				
+//					 xmlWriter.writeStartElement('message' );
+//					 xmlWriter.writeAttributeString('id', element.id);
+//						 xmlWriter.writeStartElement('extensionElements' );
+//							 xmlWriter.writeStartElement('yaoqiang:style' );
+//							 xmlWriter.writeAttributeString('init', '1');
+//							 xmlWriter.writeEndElement();
+//						 xmlWriter.writeEndElement();
+//					 xmlWriter.writeEndElement();
+//					
+//				}
+//				
+//				
+//			});
+//			var allLinks=graph.getLinks();
+//			_.each(allLinks, function (link) {
+//				var typelink=link.attr('.tipologia/text');
+//				console.log("typelink:  "+typelink);
+//				if(typelink==='sequenceFlowLink'){
+//					xmlWriter.writeStartElement('sequenceFlow' );
+//					 xmlWriter.writeAttributeString('id', link.id);
+//					 xmlWriter.writeAttributeString('sourceRef', link.get('source').id);
+//					 xmlWriter.writeAttributeString('targetRef', link.get('target').id);
+//					 xmlWriter.writeAttributeString('name', link.attributes.labels[0].attrs.text.text);
+//					 xmlWriter.writeEndElement();
+//				}
+//				
+//				if(typelink==='messageFlowLink'){
+//					xmlWriter.writeStartElement('association' );
+//					 xmlWriter.writeAttributeString('id', link.id);
+//					 xmlWriter.writeAttributeString('sourceRef', link.get('source').id);
+//					 xmlWriter.writeAttributeString('targetRef', link.get('target').id);
+//					 xmlWriter.writeAttributeString('associationDirection', 'None');
+//					 xmlWriter.writeEndElement();
+//				}
+//				
+//			});
+////			//chiudo il tag process
+//			 xmlWriter.writeEndElement();
+//			 //chiudo tag definitions
+//			 xmlWriter.writeEndElement();
+//			 xmlWriter.writeEndDocument();
+//		//	alert(xml.innerHTML);
+//			var textFileAsBlob = new Blob([xmlWriter.flush()], {type:'text/xml'});
+//			var fileNameToSaveAs = "FileXML";
+//
+//			var downloadLink = document.createElement("a");
+//			downloadLink.download = fileNameToSaveAs;
+//			downloadLink.innerHTML = "Download File";
+//			if (window.webkitURL != null)
+//			{
+//				downloadLink.href = window.webkitURL.createObjectURL(textFileAsBlob);
+//			}
+//			else
+//			{
+//				
+//				downloadLink.href = window.URL.createObjectURL(textFileAsBlob);
+//				downloadLink.style.display = "none";
+//				document.body.appendChild(downloadLink);
+//			}
+//
+//			downloadLink.click();
+//			
+//
+//		}
+//		
+//		
+		
+		
+		function parseGetVars(url)
+		{
+		  // creo una array
+		  var args = new Array();
+		  // individuo la query (cioè tutto quello che sta a destra del ?)
+		  // per farlo uso il metodo substring della proprietà search
+		  // dell'oggetto location
+		  var query = url;
+		  // se c'è una querystring procedo alla sua analisi
+		  if (query)
+		  {
+		    // divido la querystring in blocchi sulla base del carattere &
+		    // (il carattere & è usato per concatenare i diversi parametri della URL)
+		    var strList = query.split('&');
+		    // faccio un ciclo per leggere i blocchi individuati nella querystring
+		    for(str in strList)
+		    {
+		      // divido ogni blocco mediante il simbolo uguale
+		      // (uguale è usato per l'assegnazione del valore)
+		      var parts = strList[str].split('=');
+		      // inserisco nella array args l'accoppiata nome = valore di ciascun
+		      // parametro presente nella querystring
+		      args[unescape(parts[0])] = unescape(parts[1]);
+		    }
+		  }
+		  return args;
+		};
+		
+
+		function escapeHtml(text) {
+			
+			  var map = {
+			    '&': '&amp;',
+			    '<': '&lt;',
+			    '>': '&gt;',
+			    '"': '&quot;',
+			    "'": '&#039;'
+			  };
+
+			  return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+			}
+		
+		
